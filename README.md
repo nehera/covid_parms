@@ -2,7 +2,7 @@
 Aidan T. Neher, Joaquin Escobar-Dodero, Amy C. Kinsley
 
 
-University of Minnesota, Department of Veterinary Population Medicine
+University of Minnesota, Department of Veterinary Population Medicine, [Kinsley Lab](http://kinsleylab.umn.edu/)
 
 
 Note: This repository is in-progress, so the research has not been peer-reviewed.
