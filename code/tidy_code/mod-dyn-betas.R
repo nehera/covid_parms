@@ -1,13 +1,14 @@
 set.seed(12995)
 
 # define variables
-sran <- 1:3 # states to simulate, set to 1:50 to sim all 50 states
+# sran <- 1:3 # states to simulate, set to 1:50 to sim all 50 states
+sran <- c("KY", "AK", "MN", "FL", "NY", "WA")
 nsim <- 10000 # number of simulations
 dsim <- 228 # days to simulate
 
 # create out directory
 start <- Sys.time()
-out_dir <- paste("~/Desktop/COVID/data/tidy_data/runs", start, sep = "/")
+out_dir <- paste("~/Desktop/covid_parms/data/tidy_data/runs", start, sep = "/")
 out_dir <- gsub(":", "-", out_dir)
 dir.create(out_dir, showWarnings = FALSE)
 
@@ -27,20 +28,21 @@ library(MLmetrics)
 
 # source data
 
-setwd("~/Desktop/COVID/data/tidy_data")
+setwd("~/Desktop/covid_parms/data/tidy_data")
 state_phases <- read_csv("state-phases.csv")
 state_pops <- read_csv("state-pops.csv")
 state_positives <- read_csv("state-positives.csv")
 
 # source diff equations
 
-setwd("~/Desktop/COVID/code/tidy_code")
+setwd("~/Desktop/covid_parms/code/tidy_code")
 source("func-seir.R")
 
-for (j in sran) {
+for (j in 1:length(sran)) { # j in sran if sran is a vector
 
   # pull state-specific data
-  state_of_interest <- as.character(state_pops[j,2])
+  # state_of_interest <- as.character(state_pops[j,2])
+  state_of_interest <- as.character(sran[j])
   phases <- subset(state_phases, State==state_of_interest)
   phase_num <- phases$phase_num
   pop <- as.numeric(subset(state_pops, Abbrev==state_of_interest)[3])
