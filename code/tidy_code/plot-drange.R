@@ -34,7 +34,10 @@ ggplot(df2, aes(x=fct_rev(id))) +
   geom_linerange(aes(ymin=min,ymax=max),linetype=2,color="blue")+
   geom_point(aes(y=min),size=0.5,color="red") +
   geom_point(aes(y=max),size=0.5,color="red") +
-  theme_bw() + xlab("State") + ylab("Date") +
-  coord_flip()
+  theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(),
+        panel.background = element_blank(), axis.line = element_line(colour = "black")) + 
+  xlab("State") + ylab("Date") +
+  coord_flip() + 
+  scale_y_date(date_breaks = "1 month", date_labels = "%b")
 
 dev.off()
