@@ -18,17 +18,11 @@ state_phases <- read_csv("state-phases.csv")
 state_pops <- read_csv("state-pops.csv")
 state_positives <- read_csv("state-positives.csv")
 
-# setwd("~/Desktop/covid_parms/figures/exp_figures/")
-# pdf("state_parms.pdf")
-
-p_n <- c("durE", "durIa", "durIs", "durD", "durR", "p", "q", "x", "y")
-p_d <- list()
-for (i in 1:length(p_n)){
-  p_d[[i]] <- data.frame("state", "value") # running into bug here
-}
-
-dE_acc <- data.frame(matrix(nrow = 0, ncol = 2))
-colnames(dE_acc) <- c("state", "durE")
+beta_acc_all <- as.data.frame(matrix(nrow = 0, ncol = 3))
+colnames(beta_acc_all) <- c("state", "type", "value")
+parm_acc_all <- as.data.frame(matrix(nrow = 0, ncol = 10))
+colnames(parm_acc_all) <- c("state", "durE", "durIa", "durIs",
+                            "durD", "durR", "p", "q", "x", "y")
 
 for (j in 1:length(sran)) {
   # pull state-specific data
@@ -48,13 +42,39 @@ for (j in 1:length(sran)) {
   beta_acc <- beta[beta$sim_id %in% sim_acc,]
   parm_acc <- parm[parm$sim_id %in% sim_acc,]
   
-  st_vect <- rep(state_of_interest, length(sim_acc))
-  dE_temp <- data.frame("state"=st_vect, "durE"=parm_acc$durE)
-
-  dE_acc <- rbind(dE_acc, dE_temp)
+  colnames(beta_acc)[1] <- "state"
+  colnames(parm_acc)[1] <- "state"
+  
+  beta_acc$state <- state_of_interest
+  parm_acc$state <- state_of_interest
+  
+  beta_acc_all <- rbind(beta_acc_all, beta_acc)
+  parm_acc_all <- rbind(parm_acc_all, parm_acc)
 }
 
-# dev.off()
+setwd("~/Desktop/covid_parms/figures/exp_figures/")
+pdf("state_parms.pdf")
+
+# p_n <- colnames(parm_acc_all)
+
+# remove outliers
+# for (k in 2:ncol(parm_acc)) {}
+thresh_AK <- as.numeric(quantile(parm_acc_all[parm_acc_all$state == "AK",2])[4]+
+                       IQR(parm_acc_all[parm_acc_all$state == "AK",2]))
+
+parm_acc_all[,2] <- ifelse(parm_acc_all[,2] > thresh_AK & parm_acc_all[,1] == "AK", NA, parm_acc_all[,2])
+
+g_p <- ggplot(na.omit(parm_acc_all), aes(state, durE)) +
+  geom_boxplot() +
+  theme(panel.grid.major = element_blank(), 
+        panel.grid.minor = element_blank(), 
+        panel.background = element_blank(), 
+        axis.line = element_line(colour = "black")) +
+  xlab("State") + ylab("Duration of Exposure (durE)") +
+  coord_flip() + scale_y_continuous(breaks = seq(0,50,10))
+g_p
+
+dev.off()
 
 
 #   # pull each state's accepted betas by phase
