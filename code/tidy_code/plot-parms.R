@@ -64,7 +64,7 @@ thresh_AK <- as.numeric(quantile(parm_acc_all[parm_acc_all$state == "AK",2])[4]+
 
 parm_acc_all[,2] <- ifelse(parm_acc_all[,2] > thresh_AK & parm_acc_all[,1] == "AK", NA, parm_acc_all[,2])
 
-g_p <- ggplot(na.omit(parm_acc_all), aes(state, durE)) +
+g_p <- ggplot(na.omit(parm_acc_all), aes(fct_rev(state), durE)) +
   geom_boxplot() +
   theme(panel.grid.major = element_blank(), 
         panel.grid.minor = element_blank(), 
