@@ -1,9 +1,10 @@
 set.seed(12995)
 
 # define variables
-run <- "2021-02-05 15-28-13"
-run_dir <- paste("~/Desktop/COVID/data/tidy_data/runs/", run, sep = "")
-sran <- 1:3 # states to simulate, set to 1:50 to sim all 50 states
+run <- "2021-02-11 19-07-56"
+run_dir <- paste("~/Desktop/covid_parms/data/tidy_data/runs/", run, sep = "")
+# sran <- 1:3 # states to simulate, set to 1:50 to sim all 50 states
+sran <- "AK"
 nsim <- 10000 # number of simulations
 dsim <- 228 # days to simulate
 upper <- 0.01 # upper percentile of accepted rmse
@@ -13,17 +14,18 @@ library(dplyr)
 library(ggplot2)
 library(tidyr)
 
-setwd("~/Desktop/COVID/data/tidy_data")
+setwd("~/Desktop/covid_parms/data/tidy_data")
 state_phases <- read_csv("state-phases.csv")
 state_pops <- read_csv("state-pops.csv")
 state_positives <- read_csv("state-positives.csv")
 
-setwd("~/Desktop/COVID/figures/exp_figures/")
+setwd("~/Desktop/covid_parms/figures/exp_figures/")
 pdf("state_obs_v_pred.pdf")
 
-for (j in sran) {
+for (j in 1:length(sran)) { # j in sran if sran is a vector
   # pull state-specific data
-  state_of_interest <- as.character(state_pops[j,2])
+  # state_of_interest <- as.character(state_pops[j,2])
+  state_of_interest <- as.character(sran[j])
   phases <- subset(state_phases, State==state_of_interest)
   phase_num <- phases$phase_num
   pop <- as.numeric(subset(state_pops, Abbrev==state_of_interest)[3])

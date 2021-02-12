@@ -1,13 +1,14 @@
 set.seed(12995)
 
 # define variables
-sran <- 1:3 # states to simulate, set to 1:50 to sim all 50 states
+# sran <- 1:3 # states to simulate, set to 1:50 to sim all 50 states
+sran <- c("KY", "AK", "MN", "FL", "NY", "WA")
 nsim <- 10000 # number of simulations
 dsim <- 228 # days to simulate
 
 # create out directory
 start <- Sys.time()
-out_dir <- paste("~/Desktop/COVID/data/tidy_data/runs", start, sep = "/")
+out_dir <- paste("~/Desktop/covid_parms/data/tidy_data/runs", start, sep = "/")
 out_dir <- gsub(":", "-", out_dir)
 dir.create(out_dir, showWarnings = FALSE)
 
@@ -27,20 +28,21 @@ library(MLmetrics)
 
 # source data
 
-setwd("~/Desktop/COVID/data/tidy_data")
+setwd("~/Desktop/covid_parms/data/tidy_data")
 state_phases <- read_csv("state-phases.csv")
 state_pops <- read_csv("state-pops.csv")
 state_positives <- read_csv("state-positives.csv")
 
 # source diff equations
 
-setwd("~/Desktop/COVID/code/tidy_code")
+setwd("~/Desktop/covid_parms/code/tidy_code")
 source("func-seir.R")
 
-for (j in sran) {
+for (j in 1:length(sran)) { # j in sran if sran is a vector
 
   # pull state-specific data
-  state_of_interest <- as.character(state_pops[j,2])
+  # state_of_interest <- as.character(state_pops[j,2])
+  state_of_interest <- as.character(sran[j])
   phases <- subset(state_phases, State==state_of_interest)
   phase_num <- phases$phase_num
   pop <- as.numeric(subset(state_pops, Abbrev==state_of_interest)[3])
@@ -53,32 +55,30 @@ for (j in sran) {
   colnames(state_seir) <- c("sim_id", "day", "S", "E", "Ia", "Is", "D", "R")
   state_beta <- data.frame(matrix(nrow = 0, ncol = 3))
   colnames(state_beta) <- c("sim_id", "type", "value")
-  state_parm <- data.frame(matrix(nrow = 0, ncol = 10))
-  colnames(state_parm) <- c("sim_id", "durE", "durIa", "durIs", "durD", "durR", "p", "q", "x", "y")
+  state_parm <- data.frame(matrix(nrow = 0, ncol = 9))
+  colnames(state_parm) <- c("sim_id", "durE", "durIa", "durD", "durR", "p", "q", "x", "y")
   state_rmse <- data.frame(matrix(nrow = 0, ncol = 2))
   colnames(state_rmse) <- c("sim_id", "rmse")
   
   for (i in 1:nsim) {
     # priors
-    theta2 <- runif(1,0,0.5)
-    theta3 <- runif(1,0,.75)
-    theta4 <- runif(1,1,4)
-    theta5 <- runif(1,1,8)
+    theta2 <- runif(1,1,4)
+    theta3 <- runif(1,1,4)
+    theta5 <- runif(1,1,10)
     theta6 <- runif(1,1,7.5)
     theta7 <- runif(1,0,0.2)
     theta8 <- runif(1,0.2,0.8)
     # distributions assumed to be pert
-    durE <- abs(1/rpert(1, 0, theta2, 3.1, 4))
-    durIa <- abs(1/rpert(1, 0, theta3,3, 4))
-    durIs <- abs(1/rpert(1, 0, theta4,5,4))
-    durD <- abs(1/rpert(1, 0, theta5,10,4))
-    durR <- abs(1/rpert(1, 0, theta6,10,4))
+    durE <- abs(1/rpert(1, 1, theta2, 5, 4))
+    durIa <- abs(1/rpert(1, 1, theta3,5, 4))
+    durD <- abs(1/rpert(1, 1, theta5,14,4))
+    durR <- abs(1/rpert(1, 1, theta6,10,4))
     p <- abs(rpert(1, 0, theta7,.25,4))
     q <- 1-p
     x <- abs(rpert(1, 0.2, theta8, 0.9, 4))
     y <- 1-x
     
-    state_parm <- rbind(state_parm, data.frame(sim_id=i, durE=durE, durIa=durIa, durIs=durIs, durD=durD, durR=durR, p=p, q=q, x=x, y=y))
+    state_parm <- rbind(state_parm, data.frame(sim_id=i, durE=durE, durIa=durIa, durD=durD, durR=durR, p=p, q=q, x=x, y=y))
     
     # format df for outputs
     out <- data.frame(matrix(nrow = 0, ncol = 8))
@@ -97,7 +97,7 @@ for (j in sran) {
         p_end <- as.numeric(phases[k+2])
       }
       times <- seq(1, p_end-p_start+1, by = 1)
-      parameters <- c(beta = abs(beta), durE=abs(durE), durIa=abs(durIa), durIs=abs(durIs), q=abs(q),
+      parameters <- c(beta = abs(beta), durE=abs(durE), durIa=abs(durIa), q=abs(q),
                       p=abs(p), durD=abs(durD), durR=abs(durR), x=abs(x), y=abs(y))
       options(scipen=999)
       d_out <- as.data.frame(ode(y = init, times = times, func = seir, parms = parameters))
