@@ -1,9 +1,8 @@
 set.seed(12995)
 
 # define variables
-run <- "2021-02-11 11-42-30"
+run <- "2021-02-11 19-42-35"
 run_dir <- paste("~/Desktop/covid_parms/data/tidy_data/runs/", run, sep = "")
-sran <- c("AK", "FL") # states to plot
 nsim <- 10000 # number of simulations
 dsim <- 228 # days to simulate
 upper <- 0.01 # upper percentile of accepted rmse
@@ -24,9 +23,9 @@ parm_acc_all <- as.data.frame(matrix(nrow = 0, ncol = 10))
 colnames(parm_acc_all) <- c("state", "durE", "durIa", "durIs",
                             "durD", "durR", "p", "q", "x", "y")
 
-for (j in 1:length(sran)) {
+for (j in 1:length(state.abb)) {
   # pull state-specific data
-  state_of_interest <- sran[j]
+  state_of_interest <- state.abb[j]
   phases <- subset(state_phases, State==state_of_interest)
   phase_num <- phases$phase_num
   pop <- as.numeric(subset(state_pops, Abbrev==state_of_interest)[3])
@@ -57,9 +56,9 @@ beta_acc_all$type <- as.factor(beta_acc_all$type)
 setwd("~/Desktop/covid_parms/figures/exp_figures/")
 pdf("state_beta.pdf")
 
-for (k in 1:length(sran)) {
+for (k in 1:length(state.abb)) {
   
-  state_of_interest <- sran[k]
+  state_of_interest <- state.abb[k]
   
   g <- ggplot(beta_acc_all, aes(x = type, y = value, fill = type)) +
     geom_boxplot(outlier.colour = "red", outlier.shape = 1) +
