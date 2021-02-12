@@ -48,16 +48,6 @@ for (j in 1:length(sran)) {
   beta_acc$state <- state_of_interest
   parm_acc$state <- state_of_interest
   
-  thresh_b1 <- as.numeric(quantile(beta_acc[beta_acc$type == 1,3])[4]+IQR(beta_acc[beta_acc$type == 1,3]))
-  thresh_b2 <- as.numeric(quantile(beta_acc[beta_acc$type == 2,3])[4]+IQR(beta_acc[beta_acc$type == 2,3]))
-  beta_acc[,3] <- ifelse(beta_acc[beta_acc$type == 1,3] > thresh_b1, NA, beta_acc[,3])
-  beta_acc[,3] <- ifelse(beta_acc[beta_acc$type == 2,3] > thresh_b2, NA, beta_acc[,3])
-  
-  for (k in 2:length(colnames(parm_acc))) {
-    thresh_p <- as.numeric(quantile(parm_acc[,k])[4] + IQR(parm_acc[,k]))
-    parm_acc[,k] <- ifelse(parm_acc[,k] > thresh_p, NA, parm_acc[,k])
-  }
-  
   beta_acc_all <- rbind(beta_acc_all, beta_acc)
   parm_acc_all <- rbind(parm_acc_all, parm_acc)
 }
@@ -67,35 +57,21 @@ beta_acc_all$type <- as.factor(beta_acc_all$type)
 setwd("~/Desktop/covid_parms/figures/exp_figures/")
 pdf("state_beta.pdf")
 
-for (w in 1:length(sran)) {
+for (k in 1:length(sran)) {
   
-  state_of_interest <- sran[w]
+  state_of_interest <- sran[k]
   
-  # stat_box_data <- function(y) {
-  #   return(
-  #     data.frame(
-  #       y = max(na.omit(parm_acc_all[i]))*0.95,
-  #       label = paste('count =', length(na.omit(y)), '\n',
-  #                     'mean =', round(mean(na.omit(y)), digits = 3), '\n')
-  #     )
-  #   )
-  # }
+  g <- ggplot(beta_acc_all, aes(x = type, y = value, fill = type)) +
+    geom_boxplot(outlier.colour = "red", outlier.shape = 1) +
+    theme_classic() +
+    stat_summary(fun = mean, geom="point",colour="darkred", size=2) +
+    theme(legend.position="none") +
+    scale_fill_brewer(palette="Set1") +
+    labs(title = state_of_interest) +
+    xlab("Phase") + ylab("Beta")
   
-  g_b <- ggplot(na.omit(beta_acc_all), aes(x=type, y=value, fill = type)) +
-    geom_boxplot() +
-    theme(legend.position = "none",
-          panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank(), 
-          panel.background = element_blank(), 
-          axis.line = element_line(colour = "black")) +
-    xlab(state_of_interest) + ylab("Beta") +
-    coord_flip() + 
-    scale_fill_brewer(palette="BuPu") +
-    stat_summary(
-      fun.data = stat_box_data,
-      geom = "text",
-      position = position_nudge(x=0.2))
-  print(g_b)
+  print(g)
+  
 }
 
 dev.off()
@@ -106,54 +82,15 @@ pdf("state_parm.pdf")
 for (i in 2:length(colnames(parm_acc_all))) {
   
   p_of_int <- colnames(parm_acc_all)[i]
+
+  p <- ggplot(parm_acc_all, aes_string(x= "state", y = p_of_int, fill = "state")) 
+  p <- p +  geom_boxplot(outlier.colour = "red", outlier.shape = 1) 
+  p <- p + theme_classic()
+  p <- p + stat_summary(fun = mean, geom="point",colour="darkred", size=2) + theme(legend.position="none") +
+    scale_fill_brewer(palette="Set1")
   
-  stat_box_data <- function(y) {
-    return(
-      data.frame(
-        y = max(na.omit(parm_acc_all[i]))*0.95,
-        label = paste('count =', length(na.omit(y)), '\n',
-                      'mean =', round(mean(na.omit(y)), digits = 3), '\n')
-      )
-    )
-  }
-  
-  g_p <- ggplot(na.omit(parm_acc_all), aes_string('state', p_of_int, fill = 'state')) +
-    geom_boxplot() +
-    theme(legend.position = "none",
-          panel.grid.major = element_blank(), 
-          panel.grid.minor = element_blank(), 
-          panel.background = element_blank(), 
-          axis.line = element_line(colour = "black")) +
-    xlab("State") + ylab(p_of_int) +
-    coord_flip() + 
-    scale_fill_brewer(palette="BuPu") +
-    stat_summary(
-      fun.data = stat_box_data,
-      geom = "text",
-      position = position_nudge(x=0.2))
-  print(g_p)
+  print(p)
+
 }
 
 dev.off()
-#   # pull each state's accepted betas by phase
-#   acc_betas <- data.frame()
-#   
-#   for (k in sim_acc) {
-#     state_betas <- readRDS(paste(state_of_interest, "_beta.rds", sep = ""))
-#     sim_betas <- subset(state_betas, sim_id == k)
-#     rel_betas <- sim_betas[2:(phase_num+1)]
-#     acc_betas <- rbind(acc_betas, rel_betas)
-#   }
-#   
-#   names(acc_betas)[1:phase_num] <- c(1:phase_num)
-#   
-#   acc_betas <- gather(acc_betas, key = "Phase", value = "Beta")
-#   
-#   b <- ggplot(acc_betas, aes(Phase, Beta, fill=Phase)) + geom_boxplot() +
-#     scale_fill_brewer(palette="BuPu") + theme(legend.position = "none") +
-#     ylab("Beta (transmission rate)")
-#   
-#   print(b)
-# }
-# 
-# 
