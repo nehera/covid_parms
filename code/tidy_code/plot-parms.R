@@ -1,7 +1,7 @@
 set.seed(12995)
 
 # define variables
-run <- "2021-02-09 10-18-57"
+run <- "2021-02-11 11-42-30"
 run_dir <- paste("~/Desktop/covid_parms/data/tidy_data/runs/", run, sep = "")
 sran <- c("AK", "FL") # states to plot
 nsim <- 10000 # number of simulations
@@ -48,31 +48,55 @@ for (j in 1:length(sran)) {
   beta_acc$state <- state_of_interest
   parm_acc$state <- state_of_interest
   
+  thresh_b1 <- as.numeric(quantile(beta_acc[beta_acc$type == 1,3])[4]+IQR(beta_acc[beta_acc$type == 1,3]))
+  thresh_b2 <- as.numeric(quantile(beta_acc[beta_acc$type == 2,3])[4]+IQR(beta_acc[beta_acc$type == 2,3]))
+  beta_acc[,3] <- ifelse(beta_acc[beta_acc$type == 1,3] > thresh_b1, NA, beta_acc[,3])
+  beta_acc[,3] <- ifelse(beta_acc[beta_acc$type == 2,3] > thresh_b2, NA, beta_acc[,3])
+  
+  for (k in 2:length(colnames(parm_acc))) {
+    thresh_p <- as.numeric(quantile(parm_acc[,k])[4] + IQR(parm_acc[,k]))
+    parm_acc[,k] <- ifelse(parm_acc[,k] > thresh_p, NA, parm_acc[,k])
+  }
+  
   beta_acc_all <- rbind(beta_acc_all, beta_acc)
   parm_acc_all <- rbind(parm_acc_all, parm_acc)
 }
 
+# parm_acc_all <- parm_acc_all[order(parm_acc_all$state, decreasing = TRUE),]
+
 setwd("~/Desktop/covid_parms/figures/exp_figures/")
-pdf("state_parms.pdf")
+pdf("state_parm.pdf")
 
-# p_n <- colnames(parm_acc_all)
-
-# remove outliers
-# for (k in 2:ncol(parm_acc)) {}
-thresh_AK <- as.numeric(quantile(parm_acc_all[parm_acc_all$state == "AK",2])[4]+
-                       IQR(parm_acc_all[parm_acc_all$state == "AK",2]))
-
-parm_acc_all[,2] <- ifelse(parm_acc_all[,2] > thresh_AK & parm_acc_all[,1] == "AK", NA, parm_acc_all[,2])
-
-g_p <- ggplot(na.omit(parm_acc_all), aes(fct_rev(state), durE)) +
-  geom_boxplot() +
-  theme(panel.grid.major = element_blank(), 
-        panel.grid.minor = element_blank(), 
-        panel.background = element_blank(), 
-        axis.line = element_line(colour = "black")) +
-  xlab("State") + ylab("Duration of Exposure (durE)") +
-  coord_flip() + scale_y_continuous(breaks = seq(0,50,10))
-g_p
+for (i in 2:length(colnames(parm_acc_all))) {
+  
+  p_of_int <- colnames(parm_acc_all)[i]
+  
+  stat_box_data <- function(y) {
+    return(
+      data.frame(
+        y = max(na.omit(parm_acc_all[i]))*0.95,
+        label = paste('count =', length(na.omit(y)), '\n',
+                      'mean =', round(mean(na.omit(y)), digits = 3), '\n')
+      )
+    )
+  }
+  
+  g_p <- ggplot(na.omit(parm_acc_all), aes_string('state', p_of_int, fill = 'state')) +
+    geom_boxplot() +
+    theme(legend.position = "none",
+          panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(), 
+          panel.background = element_blank(), 
+          axis.line = element_line(colour = "black")) +
+    xlab("State") + ylab(p_of_int) +
+    coord_flip() + 
+    scale_fill_brewer(palette="BuPu") +
+    stat_summary(
+      fun.data = stat_box_data,
+      geom = "text",
+      position = position_nudge(x=0.2))
+  print(g_p)
+}
 
 dev.off()
 
