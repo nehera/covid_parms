@@ -36,4 +36,4 @@ This repository houses the code and data used to estimate parameter values of CO
 [State population data was sourced from the United States Census Bureau](https://www.census.gov/data/datasets/time-series/demo/popest/2010s-state-total.html#par_textimage_500989927) and [state COVID-19 case data was sourced from The COVID Tracking Project](https://covidtracking.com/data).  
 
 ## Acknowledgements
-Funding was provided by the University of Minnesota - Medical School's [CO:VID (Collaborative Outcomes: Visionary Innovation &amp; Discovery) grants program](https://clinicalaffairs.umn.edu/umn-covid-19-research/parameter-values-covid-19-united-states.). 
+Funding was provided by the University of Minnesota - Medical School's [CO:VID (Collaborative Outcomes: Visionary Innovation &amp; Discovery) grants program](https://clinicalaffairs.umn.edu/umn-covid-19-research/parameter-values-covid-19-united-states.). The authors acknowledge the Minnesota Supercomputing Institute (MSI) at the University of Minnesota for providing resources that contributed to the research results reported within this paper. URL: http://www.msi.umn.edu 
