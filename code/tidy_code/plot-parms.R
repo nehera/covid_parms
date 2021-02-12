@@ -62,7 +62,43 @@ for (j in 1:length(sran)) {
   parm_acc_all <- rbind(parm_acc_all, parm_acc)
 }
 
-# parm_acc_all <- parm_acc_all[order(parm_acc_all$state, decreasing = TRUE),]
+beta_acc_all$type <- as.factor(beta_acc_all$type)
+
+setwd("~/Desktop/covid_parms/figures/exp_figures/")
+pdf("state_beta.pdf")
+
+for (w in 1:length(sran)) {
+  
+  state_of_interest <- sran[w]
+  
+  # stat_box_data <- function(y) {
+  #   return(
+  #     data.frame(
+  #       y = max(na.omit(parm_acc_all[i]))*0.95,
+  #       label = paste('count =', length(na.omit(y)), '\n',
+  #                     'mean =', round(mean(na.omit(y)), digits = 3), '\n')
+  #     )
+  #   )
+  # }
+  
+  g_b <- ggplot(na.omit(beta_acc_all), aes(x=type, y=value, fill = type)) +
+    geom_boxplot() +
+    theme(legend.position = "none",
+          panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(), 
+          panel.background = element_blank(), 
+          axis.line = element_line(colour = "black")) +
+    xlab(state_of_interest) + ylab("Beta") +
+    coord_flip() + 
+    scale_fill_brewer(palette="BuPu") +
+    stat_summary(
+      fun.data = stat_box_data,
+      geom = "text",
+      position = position_nudge(x=0.2))
+  print(g_b)
+}
+
+dev.off()
 
 setwd("~/Desktop/covid_parms/figures/exp_figures/")
 pdf("state_parm.pdf")
@@ -99,8 +135,6 @@ for (i in 2:length(colnames(parm_acc_all))) {
 }
 
 dev.off()
-
-
 #   # pull each state's accepted betas by phase
 #   acc_betas <- data.frame()
 #   
