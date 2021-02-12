@@ -1,10 +1,10 @@
 set.seed(12995)
 
 # define variables
-run <- "2021-02-09 10-18-57"
+run <- "2021-02-11 19-07-56"
 run_dir <- paste("~/Desktop/covid_parms/data/tidy_data/runs/", run, sep = "")
 # sran <- 1:3 # states to simulate, set to 1:50 to sim all 50 states
-sran <- c("KY", "AK", "MN", "FL", "NY", "WA")
+sran <- "AK"
 nsim <- 10000 # number of simulations
 dsim <- 228 # days to simulate
 upper <- 0.01 # upper percentile of accepted rmse
