@@ -1,9 +1,7 @@
 set.seed(12995)
 
 # define variables
-# sran <- 1:3 # states to simulate, set to 1:50 to sim all 50 states
-sran <- c("KY", "AK", "MN", "FL", "NY", "WA")
-nsim <- 10000 # number of simulations
+nsim <- 10 # number of simulations
 dsim <- 228 # days to simulate
 
 # create out directory
@@ -38,11 +36,10 @@ state_positives <- read_csv("state-positives.csv")
 setwd("~/Desktop/covid_parms/code/tidy_code")
 source("func-seir.R")
 
-for (j in 1:length(sran)) { # j in sran if sran is a vector
+for (j in 1:3) { # j in sran if sran is a vector
 
   # pull state-specific data
-  # state_of_interest <- as.character(state_pops[j,2])
-  state_of_interest <- as.character(sran[j])
+  state_of_interest <- as.character(state.abb[j])
   phases <- subset(state_phases, State==state_of_interest)
   phase_num <- phases$phase_num
   pop <- as.numeric(subset(state_pops, Abbrev==state_of_interest)[3])
@@ -108,7 +105,7 @@ for (j in 1:length(sran)) { # j in sran if sran is a vector
       state_beta <- rbind(state_beta, data.frame(sim_id=i, type=k, value=beta))
       if (k!=phase_num) {
         p_start <- p_end+1
-        init <- c(S = p_out$S[p_end], E = p_out$E[p_end], Ia = p_out$Ia[p_end], Is = p_out$Is[p_end], D = p_out$D[p_end], R = p_out$R[p_end])
+        init <- c(S = p_out$S[length(times)], E = p_out$E[length(times)], Ia = p_out$Ia[length(times)], Is = p_out$Is[length(times)], D = p_out$D[length(times)], R = p_out$R[length(times)])
       }
     }
     state_seir <- rbind(state_seir, out)

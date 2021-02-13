@@ -23,7 +23,7 @@ parm_acc_all <- as.data.frame(matrix(nrow = 0, ncol = 10))
 colnames(parm_acc_all) <- c("state", "durE", "durIa", "durIs",
                             "durD", "durR", "p", "q", "x", "y")
 
-for (j in 1:length(state.abb)) {
+for (j in 1:3) {
   # pull state-specific data
   state_of_interest <- state.abb[j]
   phases <- subset(state_phases, State==state_of_interest)
@@ -56,9 +56,9 @@ beta_acc_all$type <- as.factor(beta_acc_all$type)
 setwd("~/Desktop/covid_parms/figures/exp_figures/")
 pdf("state_beta.pdf")
 
-for (k in 1:length(state.abb)) {
+for (k in 1:3) {
   
-  state_of_interest <- state.abb[k]
+  state_of_interest <- as.character(state.abb[k])
   
   g <- ggplot(beta_acc_all, aes(x = type, y = value, fill = type)) +
     geom_boxplot(outlier.colour = "red", outlier.shape = 1) +

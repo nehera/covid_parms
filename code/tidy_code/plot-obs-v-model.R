@@ -20,7 +20,7 @@ state_positives <- read_csv("state-positives.csv")
 setwd("~/Desktop/covid_parms/figures/exp_figures/")
 pdf("state_obs_v_pred.pdf")
 
-for (j in 1:length(state.abb)) { 
+for (j in 1:3) { 
   # pull state-specific data
   # state_of_interest <- as.character(state_pops[j,2])
   state_of_interest <- as.character(state.abb[j])
