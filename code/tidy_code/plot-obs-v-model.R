@@ -1,7 +1,7 @@
 set.seed(12995)
 
 # define variables
-run <- "2021-02-11 19-42-35"
+run <- "2021-02-13 08-36-08"
 run_dir <- paste("~/Desktop/covid_parms/data/tidy_data/runs/", run, sep = "")
 nsim <- 10000 # number of simulations
 dsim <- 228 # days to simulate

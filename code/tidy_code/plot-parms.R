@@ -1,7 +1,7 @@
 set.seed(12995)
 
 # define variables
-run <- "2021-02-11 19-42-35"
+run <- "2021-02-13 08-36-08"
 run_dir <- paste("~/Desktop/covid_parms/data/tidy_data/runs/", run, sep = "")
 nsim <- 10000 # number of simulations
 dsim <- 228 # days to simulate
@@ -60,7 +60,9 @@ for (k in 1:3) {
   
   state_of_interest <- as.character(state.abb[k])
   
-  g <- ggplot(beta_acc_all, aes(x = type, y = value, fill = type)) +
+  filt <- subset(beta_acc_all, state == state_of_interest)
+  
+  g <- ggplot(filt, aes(x = type, y = value, fill = type)) +
     geom_boxplot(outlier.colour = "red", outlier.shape = 1) +
     theme_classic() +
     stat_summary(fun = mean, geom="point",colour="darkred", size=2) +
