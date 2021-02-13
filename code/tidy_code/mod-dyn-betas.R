@@ -1,7 +1,7 @@
 set.seed(12995)
 
 # define variables
-nsim <- 10 # number of simulations
+nsim <- 10000 # number of simulations
 dsim <- 228 # days to simulate
 
 # create out directory
