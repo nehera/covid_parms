@@ -123,3 +123,4 @@ for (j in 1:3) { # j in sran if sran is a vector
 end <- Sys.time()
 mod_dur <- end - start
 cat(paste("This model started running at",start,"and finished running at",end,"for a timediff =",mod_dur), file = "notes.md", append = TRUE, sep = "\n\n")
+cat(paste("This model included the following warnings:",warnings()), file = "notes.md", append = TRUE, sep = "\n\n")
