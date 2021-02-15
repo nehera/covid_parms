@@ -1,11 +1,13 @@
 set.seed(12995)
 
+state.mid <- c("MN", "WI", "MI", "OH", "IN", "IL", "IA", "MO", "ND", "SD", "NE", "KS")
+
 # define variables
-run <- "2021-02-13 08-36-08"
+run <- "2021-02-15 14-34-52"
 run_dir <- paste("~/Desktop/covid_parms/data/tidy_data/runs/", run, sep = "")
 nsim <- 10000 # number of simulations
 dsim <- 228 # days to simulate
-upper <- 0.01 # upper percentile of accepted rmse
+upper <- 0.05 # upper percentile of accepted rmse
 
 library(readr)
 library(dplyr)
@@ -20,10 +22,9 @@ state_positives <- read_csv("state-positives.csv")
 setwd("~/Desktop/covid_parms/figures/exp_figures/")
 pdf("state_obs_v_pred.pdf")
 
-for (j in 1:3) { 
+for (j in 1:1) { 
   # pull state-specific data
-  # state_of_interest <- as.character(state_pops[j,2])
-  state_of_interest <- as.character(state.abb[j])
+  state_of_interest <- as.character(state.mid[j])
   phases <- subset(state_phases, State==state_of_interest)
   phase_num <- phases$phase_num
   pop <- as.numeric(subset(state_pops, Abbrev==state_of_interest)[3])

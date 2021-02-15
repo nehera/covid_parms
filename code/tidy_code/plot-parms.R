@@ -1,11 +1,13 @@
 set.seed(12995)
 
+state.mid <- c("MN", "WI", "MI", "OH", "IN", "IL", "IA", "MO", "ND", "SD", "NE", "KS")
+
 # define variables
-run <- "2021-02-13 08-36-08"
+run <- "2021-02-15 13-25-22"
 run_dir <- paste("~/Desktop/covid_parms/data/tidy_data/runs/", run, sep = "")
-nsim <- 10000 # number of simulations
+nsim <- 1000 # number of simulations
 dsim <- 228 # days to simulate
-upper <- 0.01 # upper percentile of accepted rmse
+upper <- 0.1 # upper percentile of accepted rmse
 
 library(readr)
 library(dplyr)
@@ -23,9 +25,9 @@ parm_acc_all <- as.data.frame(matrix(nrow = 0, ncol = 10))
 colnames(parm_acc_all) <- c("state", "durE", "durIa", "durIs",
                             "durD", "durR", "p", "q", "x", "y")
 
-for (j in 1:3) {
+for (j in 1:1) {
   # pull state-specific data
-  state_of_interest <- state.abb[j]
+  state_of_interest <- state.mid[j]
   phases <- subset(state_phases, State==state_of_interest)
   phase_num <- phases$phase_num
   pop <- as.numeric(subset(state_pops, Abbrev==state_of_interest)[3])
@@ -56,9 +58,9 @@ beta_acc_all$type <- as.factor(beta_acc_all$type)
 setwd("~/Desktop/covid_parms/figures/exp_figures/")
 pdf("state_beta.pdf")
 
-for (k in 1:3) {
+for (k in 1:1) {
   
-  state_of_interest <- as.character(state.abb[k])
+  state_of_interest <- as.character(state.mid[k])
   
   filt <- subset(beta_acc_all, state == state_of_interest)
   
