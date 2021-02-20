@@ -33,12 +33,19 @@ state_phases <- read_csv("state-phases.csv")
 state_pops <- read_csv("state-pops.csv")
 state_positives <- read_csv("state-positives.csv")
 
-# source diff equations
+# source functions
 
 setwd("~/Desktop/covid_parms/code/tidy_code")
-source("func-seir.R")
+source("func-seir.R") # diff eqs
 
-for (j in 1:3) { # j in sran if sran is a vector
+weighted.rmse <- function(observed, modeled, weights) { 
+  errors <- weights*(modeled-observed)^2
+  w_rmse <- sqrt(sum(errors))
+  # assign("w_rmse", w_rmse, envir = .GlobalEnv)
+  return(w_rmse)
+}
+
+for (j in 1:1) { # j in sran if sran is a vector
   
   # pull state-specific data
   state_of_interest <- as.character(state.mid[j])
@@ -56,8 +63,8 @@ for (j in 1:3) { # j in sran if sran is a vector
   colnames(state_beta) <- c("sim_id", "type", "value")
   state_parm <- data.frame(matrix(nrow = 0, ncol = 9))
   colnames(state_parm) <- c("sim_id", "durE", "durIa", "durD", "durR", "p", "q", "x", "y")
-  state_rmse <- data.frame(matrix(nrow = 0, ncol = 3))
-  colnames(state_rmse) <- c("sim_id", "type", "value")
+  state_rmse <- data.frame(matrix(nrow = 0, ncol = 2))
+  colnames(state_rmse) <- c("sim_id", "value")
   
   i=0
   
@@ -90,8 +97,11 @@ for (j in 1:3) { # j in sran if sran is a vector
     beta_temp <- data.frame(matrix(nrow = 0, ncol = 3))
     colnames(beta_temp) <- c("sim_id", "type", "value")
     
-    rmse_temp <- data.frame(matrix(nrow = 0, ncol = 3))
-    colnames(rmse_temp) <- c("sim_id", "type", "value")
+    # rmse_temp <- data.frame(matrix(nrow = 0, ncol = 2))
+    # colnames(rmse_temp) <- c("sim_id", "value")
+    
+    prop_temp <- data.frame(matrix(nrow = 0, ncol = 2))
+    colnames(prop_temp) <- c("phase", "prop")
     
     for (k in 1:phase_num) {
       # define beta
@@ -113,16 +123,28 @@ for (j in 1:3) { # j in sran if sran is a vector
       out <- rbind(out, p_out)
       beta_temp <- rbind(beta_temp, data.frame(sim_id=i, type=k, value=beta))
       
-      m_pos <- cumsum(p_out$Is * pop)
-      rmse_ph <- RMSE(m_pos, o_pos[p_start:p_end])
-      rmse_temp <- rbind(rmse_temp, data.frame(sim_id=i, type=paste("p",k,sep = ""), value=rmse_ph))
+      p_prop <- nrow(p_out)/dsim
+      prop_temp <- rbind(prop_temp, data.frame(phase=k, prop=p_prop))
+      
+      # m_pos <- cumsum(p_out$Is * pop)
+      # rmse_ph <- RMSE(m_pos, o_pos[p_start:p_end])
+      # rmse_temp <- rbind(rmse_temp, data.frame(sim_id=i, type=paste("p",k,sep = ""), value=rmse_ph))
       
       if (k!=phase_num) {
         p_start <- p_end+1
         init <- c(S = p_out$S[length(times)], E = p_out$E[length(times)], Ia = p_out$Ia[length(times)], Is = p_out$Is[length(times)], D = p_out$D[length(times)], R = p_out$R[length(times)])
       }
     }
-    rmse_trial <- (sum(rmse_temp$value))/phase_num
+    
+    m_pos <- cumsum(out$Is * pop)
+    phase_weigh <- prop_temp
+    colnames(phase_weigh) <- c("phase", "weight")
+    phase_weigh$weight <- rev(phase_weigh$weight)
+    phase_weigh$weight <- phase_weigh$weight/(prop_temp$prop*dsim)
+    w <- rep(phase_weigh$weight, prop_temp$prop*dsim)
+    rmse_trial <- weighted.rmse(o_pos, m_pos, w)
+    
+    # rmse_trial <- (sum(rmse_temp$value))/phase_num
     if (i == 1) {
       rmse_prev <- rmse_trial
     }
@@ -130,8 +152,8 @@ for (j in 1:3) { # j in sran if sran is a vector
       state_seir <- rbind(state_seir, out)
       state_beta <- rbind(state_beta, beta_temp)
       state_parm <- rbind(state_parm, data.frame(sim_id=i, durE=durE, durIa=durIa, durD=durD, durR=durR, p=p, q=q, x=x, y=y))
-      rmse_temp <- rbind(rmse_temp, data.frame(sim_id=i, type="ag", value=rmse_trial))
-      state_rmse <- rbind(state_rmse, rmse_temp)
+      # rmse_temp <- rbind(rmse_temp, data.frame(sim_id=i, value=rmse_trial))
+      state_rmse <- rbind(state_rmse, data.frame(sim_id=i, value=rmse_trial))
       rmse_prev <- rmse_trial
     } else {
       rmse_prev <- rmse_prev*1.01
