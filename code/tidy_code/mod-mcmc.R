@@ -3,7 +3,7 @@ set.seed(12995)
 state.mid <- c("MN", "WI", "ND", "MI", "OH", "IN", "IL", "IA", "MO", "SD", "NE", "KS")
 
 # define variables
-nsim <- 10000 # number of simulations
+nsim <- 10 # number of simulations
 dsim <- 228 # days to simulate
 
 # create out directory
@@ -45,7 +45,7 @@ weighted.rmse <- function(observed, modeled, weights) {
   return(w_rmse)
 }
 
-for (j in 1:1) { # j in sran if sran is a vector
+for (j in 1:3) { # j in sran if sran is a vector
   
   # pull state-specific data
   state_of_interest <- as.character(state.mid[j])
@@ -156,7 +156,7 @@ for (j in 1:1) { # j in sran if sran is a vector
       state_rmse <- rbind(state_rmse, data.frame(sim_id=i, value=rmse_trial))
       rmse_prev <- rmse_trial
     } else {
-      rmse_prev <- rmse_prev*1.01
+      rmse_prev <- rmse_prev*1.1
     }
   }
   setwd(out_dir)
