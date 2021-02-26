@@ -18,3 +18,6 @@ extract.dates <- function(state_of_interest) {
 }
 
 res <- ldply(lapply(states, extract.dates),rbind)
+
+setwd("~/Desktop/covid_parms/data/tidy_data")
+write.csv(res, "state-time-to-dec11.csv")
