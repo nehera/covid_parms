@@ -1,5 +1,7 @@
 set.seed(12995)
 
+state.mid <- c("MN", "WI", "MI", "OH", "IN", "IL", "IA", "MO", "ND", "SD", "NE", "KS")
+
 # define variables
 nsim <- 10000 # number of simulations
 dsim <- 228 # days to simulate
@@ -36,10 +38,10 @@ state_positives <- read_csv("state-positives.csv")
 setwd("~/Desktop/covid_parms/code/tidy_code")
 source("func-seir.R")
 
-for (j in 1:3) { # j in sran if sran is a vector
+for (j in 1:1) { # j in sran if sran is a vector
 
   # pull state-specific data
-  state_of_interest <- as.character(state.abb[j])
+  state_of_interest <- as.character(state.mid[j])
   phases <- subset(state_phases, State==state_of_interest)
   phase_num <- phases$phase_num
   pop <- as.numeric(subset(state_pops, Abbrev==state_of_interest)[3])

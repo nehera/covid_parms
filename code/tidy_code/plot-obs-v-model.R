@@ -1,16 +1,20 @@
 set.seed(12995)
 
+state.mid <- c("MN", "WI", "ND", "OH", "IN", "IL", "IA", "MO", "SD", "KS") # "MI", "NE"
+
 # define variables
-run <- "2021-02-13 08-36-08"
+run <- "2021-02-25 19-21-09"
 run_dir <- paste("~/Desktop/covid_parms/data/tidy_data/runs/", run, sep = "")
 nsim <- 10000 # number of simulations
 dsim <- 228 # days to simulate
-upper <- 0.01 # upper percentile of accepted rmse
+upper <- 0.1 # upper percentile of accepted rmse
 
 library(readr)
 library(dplyr)
 library(ggplot2)
 library(tidyr)
+library(MLmetrics)
+library(modi)
 
 setwd("~/Desktop/covid_parms/data/tidy_data")
 state_phases <- read_csv("state-phases.csv")
@@ -20,10 +24,9 @@ state_positives <- read_csv("state-positives.csv")
 setwd("~/Desktop/covid_parms/figures/exp_figures/")
 pdf("state_obs_v_pred.pdf")
 
-for (j in 1:3) { 
+for (j in 1:10) { 
   # pull state-specific data
-  # state_of_interest <- as.character(state_pops[j,2])
-  state_of_interest <- as.character(state.abb[j])
+  state_of_interest <- as.character(state.mid[j])
   phases <- subset(state_phases, State==state_of_interest)
   phase_num <- phases$phase_num
   pop <- as.numeric(subset(state_pops, Abbrev==state_of_interest)[3])
@@ -35,8 +38,9 @@ for (j in 1:3) {
   setwd(run_dir)
   pred <- read_rds(paste(state_of_interest, "_seir.rds", sep = ""))
   rmse <- read_rds(paste(state_of_interest, "_rmse.rds", sep = ""))
-  up_r <- quantile(rmse$rmse, upper)
-  sim_acc <- subset(rmse, rmse <= up_r)$sim_id
+  
+  up_r <- quantile(rmse$value, upper)
+  sim_acc <- subset(rmse, value <= up_r)$sim_id
 
   p <- ggplot() + 
     theme_bw()
