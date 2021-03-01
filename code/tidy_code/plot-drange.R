@@ -1,11 +1,14 @@
-dsim <- 228 # days simulated
-
-library(readr)
+library(data.table)
 library(dplyr)
 library(ggplot2)
 
 setwd("~/Desktop/covid_parms/data/tidy_data")
-state_positives <- read_csv("state-positives.csv")
+state_phases <- fread("state-phases.csv") # would be nice to denote state phase breakpoints on plot
+state_positives <- fread("state-positives.csv")
+state_dsim <- fread("state-time-to-dec11.csv") # need to imp dsims thru dec 11
+
+state.mid <- as.list(c("MN", "WI", "ND", "MI", "OH", "IN", "IL", "IA", "MO", "SD", "NE", "KS")) # need to make Midwest specific
+
 df <- data.frame()
 for (i in state.abb) {
   state <- subset(state_positives, state==i)

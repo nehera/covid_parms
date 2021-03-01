@@ -20,6 +20,7 @@ weighted.rmse <- function(observed, modeled, weights) {
 
 my.sim <- function(state_of_interest) {
   # pull state-specific data
+  dsim <- as.numeric(state_dsim[which(state_dsim$state==state_of_interest),3]) # the number of days to sim/state was calculated as the diff in time between Dec 11, 2020 and the state's epidemic start point
   phases <- state_phases[which(state_phases$State==state_of_interest),2:4]
   phase_num <- state_phases$phase_num[which(state_phases$State==state_of_interest)]
   pop <- as.numeric(state_pops[which(state_pops$Abbrev==state_of_interest),3])
@@ -125,7 +126,7 @@ my.sim <- function(state_of_interest) {
       state_rmse[a] <- data.frame(sim_id=i, value=rmse_trial)
       rmse_prev <- rmse_trial
     } else {
-      rmse_prev <- rmse_prev*1.1
+      rmse_prev <- rmse_prev*1.01
     }
   }
   setwd(out_dir)
