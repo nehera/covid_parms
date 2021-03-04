@@ -21,8 +21,8 @@ weighted.rmse <- function(observed, modeled, weights) {
 my.sim <- function(state_of_interest) {
   # pull state-specific data
   dsim <- as.numeric(state_dsim[which(state_dsim$state==state_of_interest),3]) # the number of days to sim/state was calculated as the diff in time between Dec 11, 2020 and the state's epidemic start point
-  phases <- state_phases[which(state_phases$State==state_of_interest),2:4]
-  phase_num <- state_phases$phase_num[which(state_phases$State==state_of_interest)]
+  phases <- state_phases[which(state_phases$state==state_of_interest),2:9]
+  phase_num <- state_phases$phase_num[which(state_phases$state==state_of_interest)]
   pop <- as.numeric(state_pops[which(state_pops$Abbrev==state_of_interest),3])
   o_pos <- state_positives$positive[which(state_positives$state==state_of_interest)][1:dsim]
   
@@ -107,11 +107,16 @@ my.sim <- function(state_of_interest) {
       }
     }
     
-    m_pos <- cumsum(out$Is * pop)
-    weights <- prop_temp
-    colnames(weights) <- c("phase", "weight")
-    weights$weight <- rev(prop_temp$prop)/(prop_temp$prop*dsim)
-    w <- rep(weights$weight, prop_temp$prop*dsim)
+    m_pos <- cumsum(durIa*out$Ia*pop*x)
+    # m_pos <- cumsum(out$Is * pop)
+    w_t <- prop_temp
+    setorder(prop_temp, prop)
+    setorder(w_t, prop)
+    colnames(w_t) <- c("phase", "weight")
+    w_t$weight <- rev(w_t$weight)/(prop_temp$prop*dsim) # df needs to be ordered by prop first
+    setorder(prop_temp, phase)
+    setorder(w_t, phase)
+    w <- rep(w_t$weight, prop_temp$prop*dsim)
     rmse_trial <- weighted.rmse(o_pos, m_pos, w)
     
     if (i == 1) {
@@ -134,4 +139,56 @@ my.sim <- function(state_of_interest) {
   saveRDS(as.data.frame(state_beta), paste(state_of_interest, "_beta.rds", sep = ""))
   saveRDS(as.data.frame(state_parm), paste(state_of_interest, "_parm.rds", sep = ""))
   saveRDS(as.data.frame(state_rmse), paste(state_of_interest, "_rmse.rds", sep = ""))
+}
+
+plot.ovm <- function(state_of_interest, run, upper) {
+  set.seed(12995)
+  pacman::p_load(readr, dplyr, ggplot2, tidyr, MLmetrics, modi)
+  run_dir <- paste("~/Desktop/covid_parms/data/tidy_data/runs/", run, sep = "")
+  
+  # pull state-specific data
+  dsim <- as.numeric(state_dsim[which(state_dsim$state==state_of_interest),3]) # the number of days to sim/state was calculated as the diff in time between Dec 11, 2020 and the state's epidemic start point
+  phases <- state_phases[which(state_phases$state==state_of_interest),2:9]
+  phase_num <- state_phases$phase_num[which(state_phases$state==state_of_interest)]
+  pop <- as.numeric(state_pops[which(state_pops$Abbrev==state_of_interest),3])
+  o_pos <- state_positives$positive[which(state_positives$state==state_of_interest)][1:dsim]
+  
+  o_df <- data.frame(Day = 1:dsim, Positives = o_pos / pop)
+  
+  setwd(run_dir)
+  pred <- read_rds(paste(state_of_interest, "_seir.rds", sep = ""))
+  rmse <- read_rds(paste(state_of_interest, "_rmse.rds", sep = ""))
+  
+  up_r <- quantile(rmse$value, upper)
+  sim_acc <- subset(rmse, value <= up_r)$sim_id
+  
+  p <- ggplot() + 
+    theme_bw() +
+    xlim(0,dsim) +
+    ylim(0,0.05)
+ 
+  if (phase_num==1){
+    d <- data.frame(x1=0,x2=dsim,t='a')
+  } else {
+    d <- data.frame(x1=c(0,as.numeric(phases[1,2:phase_num])),
+                    x2=c(as.numeric(phases[1,2:phase_num]),dsim),
+                    t=letters[1:(phase_num)])
+  }
+  
+  p <- p + geom_rect(data=d, mapping=aes(xmin=x1, xmax=x2, ymin=-Inf, ymax=Inf, fill=t), color="white", alpha=0.25, show.legend = FALSE)
+  
+  # plot accepted sims
+  for (i in sim_acc) {
+    m_pos <- subset(pred, sim_id == i)
+    m_pos <- cumsum(durIa*pred$Ia*pop*x) # cumsum(m_pos$Is)
+    m_pos_df <- data.frame(Day = 1:dsim, Positives = m_pos)
+    p <- p + geom_line(data = m_pos_df, aes(x = Day, y = Positives), color = "gray78")
+  }
+  
+  # plot actual data
+  p <- p + geom_line(data = o_df, aes(x = Day, y = Positives), color = "grey28") +
+    ggtitle(state_of_interest) + xlab("Days Post 1st Case In-State") +
+    ylab("Positive Cases (Proportion of State Population)")
+  
+  print(p)
 }

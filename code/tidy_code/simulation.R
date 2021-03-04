@@ -19,7 +19,7 @@ setwd("~/Desktop/covid_parms/code/tidy_code")
 source("functions.R")
 
 setwd("~/Desktop/covid_parms/data/tidy_data")
-state_phases <- fread("state-phases.csv")
+state_phases <- fread("midwest-phases.csv")
 state_pops <- fread("state-pops.csv")
 state_positives <- fread("state-positives.csv")
 state_dsim <- fread("state-time-to-dec11.csv")

@@ -1,12 +1,11 @@
 set.seed(12995)
 
-state.mid <- c("MN", "WI", "ND", "OH", "IN", "IL", "IA", "MO", "SD", "KS") # "MI", "NE"
+state.mid <- c("MN", "WI", "ND", "OH", "IN", "IL", "IA", "MO", "SD", "KS", "NE") # "MI"
 
 # define variables
 run <- "2021-02-25 19-21-09"
 run_dir <- paste("~/Desktop/covid_parms/data/tidy_data/runs/", run, sep = "")
 nsim <- 10000 # number of simulations
-dsim <- 228 # days to simulate
 upper <- 0.1 # upper percentile of accepted rmse
 
 library(readr)
@@ -20,13 +19,15 @@ setwd("~/Desktop/covid_parms/data/tidy_data")
 state_phases <- read_csv("state-phases.csv")
 state_pops <- read_csv("state-pops.csv")
 state_positives <- read_csv("state-positives.csv")
+state_dsim <- read_csv("state-time-to-dec11.csv")
 
 setwd("~/Desktop/covid_parms/figures/exp_figures/")
 pdf("state_obs_v_pred.pdf")
 
-for (j in 1:10) { 
+for (j in 1:11) { 
   # pull state-specific data
   state_of_interest <- as.character(state.mid[j])
+  dsim <- as.numeric(state_dsim[which(state_dsim$state==state_of_interest),3])
   phases <- subset(state_phases, State==state_of_interest)
   phase_num <- phases$phase_num
   pop <- as.numeric(subset(state_pops, Abbrev==state_of_interest)[3])
@@ -53,7 +54,7 @@ for (j in 1:10) {
                     t=letters[1:phase_num])
   }
   
-  p <- p + geom_rect(data=d, mapping=aes(xmin=x1, xmax=x2, ymin=-Inf, ymax=Inf, fill=t), color="gray100", alpha=0.1, show.legend = FALSE)
+  p <- p + geom_rect(data=d, mapping=aes(xmin=x1, xmax=x2, ymin=-Inf, ymax=Inf, fill=t), color="black", alpha=1, show.legend = FALSE) 
   
   # plot accepted sims
   for (i in sim_acc) {
